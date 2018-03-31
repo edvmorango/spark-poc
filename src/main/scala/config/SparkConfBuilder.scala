@@ -11,7 +11,7 @@ object SparkConfBuilder {
     ).toTraversable
 
 
-  def defaultConnection(): SparkConf = {
+  lazy val defaultConfiguration: SparkConf = {
     new SparkConf().setAll(defConfig)
   }
 
