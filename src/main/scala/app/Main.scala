@@ -1,6 +1,7 @@
 package app
 
 import config.SparkConfBuilder
+import jobs.NasaRequestJob
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 import utils.PathUtils
@@ -11,10 +12,13 @@ object Main {
 
     val sc = new SparkContext(SparkConfBuilder.defaultConfiguration)
 
-    val rdd: RDD[String] = sc.textFile(PathUtils.default)
+    val job = NasaRequestJob(sc)
 
-    println(rdd.count())
+    val x = job.execute()
 
+    println(x.count())
+
+    println("FINISHED")
   }
 
 }
