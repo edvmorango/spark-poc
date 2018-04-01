@@ -7,3 +7,4 @@ case class NasaRequest(host: String,
                        request: String,
                        code: Long,
                        bytes: Long)
+    extends Serializable

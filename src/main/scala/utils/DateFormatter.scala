@@ -1,5 +1,6 @@
 package utils
 
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 object DateFormatter {
@@ -7,9 +8,17 @@ object DateFormatter {
 
   private val default = "dd/MMM/yyyy:HH:mm:ss Z"
 
-  def format(date: String, format: String = default): ZonedDateTime = {
-    val fmt = DateTimeFormatter.ofPattern(default)
+  private val dtDefault = "dd/MM/yyyy"
 
-    ZonedDateTime.parse("01/Aug/1995:00:00:01 -0400", fmt)
+  def format(date: String, format: String = default): ZonedDateTime = {
+    val fmt = DateTimeFormatter.ofPattern(format)
+
+    ZonedDateTime.parse(date, fmt)
   }
+
+  def zonedToLocalDate(date: ZonedDateTime,
+                       format: String = dtDefault): LocalDate = {
+    LocalDate.parse(date.toLocalDate.toString)
+  }
+
 }

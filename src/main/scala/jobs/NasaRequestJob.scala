@@ -12,8 +12,6 @@ import scala.util.Try
 
 case class NasaRequestJob(sc: SparkContext) {
 
-  // For some reason Sparks don't accept closures as HoF/methods, indepently of visibility level
-
   private def transformData(l: String): NasaRequest = {
     if (l.split(' ').size < 4)
       NasaRequest("Ok", ZonedDateTime.now(), "", 200, 0)
@@ -43,39 +41,6 @@ case class NasaRequestJob(sc: SparkContext) {
 
       NasaRequest(host, time, request, code, size)
     }
-  }
-
-  private def transformValidData(l: String): TraversableOnce[NasaRequest] = {
-    if (l.split(' ').size < 4)
-      Nil
-    else {
-
-      val host = l.split(' ').head
-
-      val timeHead = l.drop(host.size).dropWhile(_ != '[').tail.split(']')
-
-      val time = DateFormatter.format(timeHead.head)
-
-      val requestString = timeHead.tail.mkString("")
-
-      val reqClear = requestString.dropWhile(_ != '\"').replace("\"", "")
-
-      val reqList = reqClear.split(" ")
-
-      val reqParts = reqList.takeWhile(s => s.isEmpty || !s.forall(_.isDigit))
-
-      val request = reqParts.mkString(" ")
-
-      val cols = reqList.drop(reqParts.size)
-
-      val code = cols(0).toLong
-
-      val size = Try(cols(1).toLong).getOrElse(0L)
-
-      Array(NasaRequest(host, time, request, code, size))
-
-    }
-
   }
 
   private def getData(): RDD[NasaRequest] = {
@@ -131,19 +96,20 @@ case class NasaRequestJob(sc: SparkContext) {
       nfRequests
         .map(r => (r.host, 1L))
         .reduceByKey(_ + _)
-//        .sortBy[Long](_._2, ascending = false)
-        .takeOrdered(5)
+        .top(5)(Ordering.fromLessThan[(String, Long)]((f, s) => s._2 > f._2))
 
-    val errorPerDay =
-      nfRequests.map(r => (r.time.toLocalDate, 1L)).reduceByKey(_ + _)
+    val errorsPerDay =
+      nfRequests
+        .map(r => (r.time.toLocalDate, 1L))
+        .reduceByKey(_ + _)
+        .collect()
+        .toList
 
     val bytes = responses.map(_.bytes).reduce(_ + _)
 
     println(s"Hosts: $uniqueHosts" +
-      s"\n404 Count: $nfRequestsCount\n404 Urls: ${mostErroneousUrls.toList}\nErrors per day: ${errorPerDay}" +
+      s"\n404 Count: $nfRequestsCount\n404 Urls: ${mostErroneousUrls.toList}\nErrors per day: ${errorsPerDay}" +
       s"\nBytes: $bytes")
-
-    mostErroneousUrls
 
   }
 

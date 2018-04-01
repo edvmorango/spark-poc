@@ -13,7 +13,8 @@ object Main {
 
     val job = NasaRequestJob(sc)
 
-    val x = job.execute()
+    job.execute()
+
   }
 
 }
