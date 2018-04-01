@@ -1,5 +1,12 @@
 package app
 
+import java.text.{DateFormat, SimpleDateFormat}
+import java.time.LocalDateTime
+import java.time.ZonedDateTime
+
+import java.time.format.DateTimeFormatter
+import java.util.Formatter.DateTime
+
 import config.SparkConfBuilder
 import jobs.NasaRequestJob
 import org.apache.spark.rdd.RDD
@@ -18,7 +25,6 @@ object Main {
 
     println(x.count())
 
-    println("FINISHED")
   }
 
 }

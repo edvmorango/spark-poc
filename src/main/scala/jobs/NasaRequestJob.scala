@@ -1,8 +1,10 @@
 package jobs
 
+import java.time.ZonedDateTime
+
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
-import utils.PathUtils
+import utils.{DateFormatter, PathUtils}
 import domain._
 
 import scala.collection.TraversableOnce
@@ -14,14 +16,14 @@ case class NasaRequestJob(sc: SparkContext) {
 
   private def transformData(l: String): NasaRequest = {
     if (l.split(' ').size < 4)
-      NasaRequest("Ok", "", "", 200, 0)
+      NasaRequest("Ok", ZonedDateTime.now(), "", 200, 0)
     else {
 
       val host = l.split(' ').head
 
       val timeHead = l.drop(host.size).dropWhile(_ != '[').tail.split(']')
 
-      val time = timeHead.head
+      val time = DateFormatter.format(timeHead.head)
 
       val requestString = timeHead.tail.mkString("")
 
@@ -52,7 +54,7 @@ case class NasaRequestJob(sc: SparkContext) {
 
       val timeHead = l.drop(host.size).dropWhile(_ != '[').tail.split(']')
 
-      val time = timeHead.head
+      val time = DateFormatter.format(timeHead.head)
 
       val requestString = timeHead.tail.mkString("")
 
@@ -89,7 +91,7 @@ case class NasaRequestJob(sc: SparkContext) {
 
         val timeHead = l.drop(host.size).dropWhile(_ != '[').tail.split(']')
 
-        val time = timeHead.head
+        val time = DateFormatter.format(timeHead.head)
 
         val requestString = timeHead.tail.mkString("")
 
