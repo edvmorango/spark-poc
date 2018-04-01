@@ -78,7 +78,7 @@ case class NasaRequestJob(sc: SparkContext) {
 
   }
 
-  def execute() = {
+  private def getData(): RDD[NasaRequest] = {
 
     val raw: RDD[String] = sc.textFile(PathUtils.default)
 
@@ -114,7 +114,36 @@ case class NasaRequestJob(sc: SparkContext) {
 
     }
 
-    data
+    data.cache()
+
+  }
+
+  def execute() = {
+
+    val responses = getData()
+
+    val uniqueHosts = responses.map(_.host).distinct().count()
+    val nfRequests = responses.filter(_.code == 404).cache()
+
+    val nfRequestsCount = nfRequests.count()
+
+    val mostErroneousUrls =
+      nfRequests
+        .map(r => (r.host, 1L))
+        .reduceByKey(_ + _)
+//        .sortBy[Long](_._2, ascending = false)
+        .takeOrdered(5)
+
+    val errorPerDay =
+      nfRequests.map(r => (r.time.toLocalDate, 1L)).reduceByKey(_ + _)
+
+    val bytes = responses.map(_.bytes).reduce(_ + _)
+
+    println(s"Hosts: $uniqueHosts" +
+      s"\n404 Count: $nfRequestsCount\n404 Urls: ${mostErroneousUrls.toList}\nErrors per day: ${errorPerDay}" +
+      s"\nBytes: $bytes")
+
+    mostErroneousUrls
 
   }
 

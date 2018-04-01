@@ -1,30 +1,19 @@
 package app
 
-import java.text.{DateFormat, SimpleDateFormat}
-import java.time.LocalDateTime
-import java.time.ZonedDateTime
-
-import java.time.format.DateTimeFormatter
-import java.util.Formatter.DateTime
-
 import config.SparkConfBuilder
 import jobs.NasaRequestJob
-import org.apache.spark.rdd.RDD
-import org.apache.spark.{SparkConf, SparkContext}
-import utils.PathUtils
+import org.apache.spark.SparkContext
 
 object Main {
 
   def main(args: Array[String]): Unit = {
 
     val sc = new SparkContext(SparkConfBuilder.defaultConfiguration)
+    println(sc.defaultMinPartitions)
 
     val job = NasaRequestJob(sc)
 
     val x = job.execute()
-
-    println(x.count())
-
   }
 
 }
