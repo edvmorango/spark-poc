@@ -9,7 +9,6 @@ object Main {
   def main(args: Array[String]): Unit = {
 
     val sc = new SparkContext(SparkConfBuilder.defaultConfiguration)
-    println(sc.defaultMinPartitions)
 
     val job = NasaRequestJob(sc)
 
