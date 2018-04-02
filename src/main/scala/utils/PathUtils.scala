@@ -2,6 +2,7 @@ package utils
 
 object PathUtils {
 
-  lazy val default =  System.getProperty("user.dir").concat("/datasets")
-
+  lazy val base = System.getProperty("user.dir")
+  lazy val default = base.concat("/datasets")
+  lazy val result = base.concat("/result/")
 }
